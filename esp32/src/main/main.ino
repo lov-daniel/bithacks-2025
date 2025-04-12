@@ -9,7 +9,9 @@ const int pulse_threshold = 550;
 const movement_threshold = 9999;
 
 
-// wire setup
+// wire setup 
+// avoid using pins 6-11 since it affects memory
+// avoid using 0, 2, 15 since it affects boot
 const int pulse_wire = 0; // wire that pulse sensor is connected to, change to actual pin later
 const int led = 38; // on board RGB led (led on gpio pin 38)
 const SDA = 18;
@@ -36,6 +38,7 @@ void setup() {
     Wire.begin(SDA, SCL)
 
     // init code for accelerometer
+    // TODO: look at interrupts so that the lsm6ds0x can wake up esp32 when needed
     if (!IMU.begin()) {
         Serial.println("error while initializing lsm6ds0x");
         while (1);
