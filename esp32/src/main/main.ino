@@ -5,17 +5,15 @@
 // constants
 const char* ssid = "esp_test";
 const char* password = "pctq3111";
-const int pulse_threshold = 550;
-const movement_threshold = 9999;
+const int pulse_threshold = 50;
+const int movement_threshold = 9999;
 
 
 // wire setup 
 // avoid using pins 6-11 since it affects memory
 // avoid using 0, 2, 15 since it affects boot
-const int pulse_wire = 0; // wire that pulse sensor is connected to, change to actual pin later
+const int pulse_wire = 17; // wire that pulse sensor is connected to, change to actual pin later
 const int led = 38; // on board RGB led (led on gpio pin 38)
-const SDA = 18;
-const SCL = 19; 
 
 // globals
 volatile float x, y, z; // current position variables
@@ -31,19 +29,19 @@ void setup() {
     pulse_sensor.setThreshold(pulse_threshold);
 
     if (!pulse_sensor.begin()) {
-        Serial.println("error while initializing pulse sensor")
+        Serial.println("error while initializing pulse sensor");
     }
 
     // sets up gpio pins for i2c communication
-    Wire.begin(SDA, SCL)
+    Wire.begin(SDA, SCL);
 
-    // init code for accelerometer
+    /*// init code for accelerometer
     // TODO: look at interrupts so that the lsm6ds0x can wake up esp32 when needed
     if (!IMU.begin()) {
         Serial.println("error while initializing lsm6ds0x");
         while (1);
     }
-
+    */
     WiFi.mode(WIFI_STA); // sets esp to station mode so it can connect to internet
     WiFi.begin(ssid, password); // starts up wifi
     Serial.println("\nConnecting"); 
@@ -60,11 +58,20 @@ void setup() {
 
 void loop() {
 
-    // test for accelerometer hookup
+    /*// test for accelerometer hookup
     if (IMU.accelerationAvailable()) {
         IMU.readAcceleration(x, y, z);
         Serial.print("X: "); Serial.print(x);
         Serial.print(", Y: "); Serial.print(y);
         Serial.print(", Z: "); Serial.println(z);
     }
+    */
+    if(pulse_sensor.sawStartOfBeat()) {
+        int BPM = pulse_sensor.getBeatsPerMinute(); 
+        Serial.print("You're not dead");
+        Serial.println("BPM: ");
+        Serial.print(BPM);
+    }
+
+    delay(200);
 }
