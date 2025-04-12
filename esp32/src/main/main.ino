@@ -5,14 +5,14 @@
 // constants
 const char* ssid = "esp_test";
 const char* password = "pctq3111";
-const int pulse_threshold = 50;
+const int pulse_threshold = 400;
 const int movement_threshold = 9999;
 
 
 // wire setup 
 // avoid using pins 6-11 since it affects memory
 // avoid using 0, 2, 15 since it affects boot
-const int pulse_wire = 17; // wire that pulse sensor is connected to, change to actual pin later
+const int pulse_wire = A1; // wire that pulse sensor is connected to, change to actual pin later
 const int led = 38; // on board RGB led (led on gpio pin 38)
 
 // globals
@@ -68,10 +68,10 @@ void loop() {
     */
     if(pulse_sensor.sawStartOfBeat()) {
         int BPM = pulse_sensor.getBeatsPerMinute(); 
-        Serial.print("You're not dead");
-        Serial.println("BPM: ");
-        Serial.print(BPM);
+
+        Serial.print("BPM: ");
+        Serial.println(BPM);
     }
 
-    delay(200);
+    delay(20);
 }
