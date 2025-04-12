@@ -31,6 +31,10 @@ def create_app():
 
   @app.route('/insert-single/', methods=['GET', 'POST'])
   def insert_single():
+
+    if request.method == 'GET':
+        return json.loads(json_util.dumps(list(cluster.find()))), 200, {'Content-Type': 'application/json'}
+
     data = None
     try:
       data = request.get_json()
@@ -46,6 +50,10 @@ def create_app():
 
   @app.route('/insert-batch/', methods=['GET', 'POST'])
   def insert_batch():
+
+    if request.method == 'GET':
+        return json.loads(json_util.dumps(list(cluster.find()))), 200, {'Content-Type': 'application/json'}
+
     data = None
     try:
       data = request.get_json()
