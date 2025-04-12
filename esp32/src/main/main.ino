@@ -1,11 +1,67 @@
+#include <WiFi.h>
+#include <Arduino_LSM6DSOX.h>
+#include <PulseSensorPlayground.h>
 
+// constants
+const char* ssid = "esp_test";
+const char* password = "pctq3111";
+const int pulse_threshold = 550;
+const movement_threshold = 9999;
+
+
+// wire setup
+const int pulse_wire = 0; // wire that pulse sensor is connected to, change to actual pin later
+const int led = 38; // on board RGB led (led on gpio pin 38)
+const SDA = 18;
+const SCL = 19; 
+
+// globals
+volatile float x, y, z; // current position variables
+PulseSensorPlayground pulse_sensor;
 
 void setup() {
-  // put your setup code here, to run once:
+    Serial.begin(115200);
+    delay(1000);
 
+    // init code for pulse sensor
+    pulse_sensor.analogInput(pulse_wire);
+    pulse_sensor.blinkOnPulse(led);
+    pulse_sensor.setThreshold(pulse_threshold);
+
+    if (!pulse_sensor.begin()) {
+        Serial.println("error while initializing pulse sensor")
+    }
+
+    // sets up gpio pins for i2c communication
+    Wire.begin(SDA, SCL)
+
+    // init code for accelerometer
+    if (!IMU.begin()) {
+        Serial.println("error while initializing lsm6ds0x");
+        while (1);
+    }
+
+    WiFi.mode(WIFI_STA); // sets esp to station mode so it can connect to internet
+    WiFi.begin(ssid, password); // starts up wifi
+    Serial.println("\nConnecting"); 
+
+    while(WiFi.status() != WL_CONNECTED){
+        Serial.print(".");
+        delay(100);
+    }
+
+    Serial.println("\nConnected to the WiFi network");
+    Serial.print("Local ESP32 IP: ");
+    Serial.println(WiFi.localIP());
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
 
+    // test for accelerometer hookup
+    if (IMU.accelerationAvailable()) {
+        IMU.readAcceleration(x, y, z);
+        Serial.print("X: "); Serial.print(x);
+        Serial.print(", Y: "); Serial.print(y);
+        Serial.print(", Z: "); Serial.println(z);
+    }
 }
