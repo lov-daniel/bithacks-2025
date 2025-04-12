@@ -27,7 +27,7 @@ def create_app():
   @app.route('/', methods=['GET'])
   def base():
     if request.method == 'GET':
-      return cluster.find()
+      return json.loads(json_util.dumps(list(cluster.find()))), 200, {'Content-Type': 'application/json'}
 
   @app.route('/insert-single/', methods=['GET', 'POST'])
   def insert_single():
