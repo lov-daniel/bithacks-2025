@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Points Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Acceleration Data Graph</h1>
+    <canvas id="accelChart" width="800" height="400"></canvas>
+
+    <script>
+        // Jinja2 templated variable
+        const points = {{ points | tojson }};
+
+        // Extract data for the graph
+        const timestamps = points.map(point => point.timestamp);
+        const accelX = points.map(point => point.accel_x);
+        const accelY = points.map(point => point.accel_y);
+        const accelZ = points.map(point => point.accel_z);
+
+        // Create the chart
+        const ctx = document.getElementById('accelChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timestamps,
+                datasets: [
+                    {
+                        label: 'Accel X',
+                        data: accelX,
+                        borderColor: 'red',
+                        fill: false
+                    },
+                    {
+                        label: 'Accel Y',
+                        data: accelY,
+                        borderColor: 'green',
+                        fill: false
+                    },
+                    {
+                        label: 'Accel Z',
+                        data: accelZ,
+                        borderColor: 'blue',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Timestamp'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Acceleration'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

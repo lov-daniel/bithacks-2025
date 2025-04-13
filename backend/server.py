@@ -1,11 +1,20 @@
 
 # server.py
 
-from flask import Flask, request, Response
+from flask import Flask, request, Response, render_template
 from db import *
 from dateutil import parser
 from bson import json_util, ObjectId
 import json
+
+def fetch_x_most_recent(cluster, limit=206):
+  return list(cluster.aggregate([
+      {"$sort": {"timestamp": -1}},
+      {"$limit": limit}
+  ]))[::-1]
+
+def make_prediction():
+  pass
 
 def create_app():
   vars = {}
@@ -17,7 +26,9 @@ def create_app():
 
   uri = vars['CONNECTION_URI']
   cluster = get_collection(uri, 'bithacks2025', 'bithacks2025')
-  print(dict(cluster.find()))
+  if ('remove' in vars and vars['remove'] == 'true'):
+    empty_db(cluster)
+
   print(list(cluster.find()))
   for v in cluster.find():
     print(v)
@@ -67,7 +78,17 @@ def create_app():
       return json.loads(json_util.dumps(list(cluster.find()))), 201, {'Content-Type': 'application/json'}
     except:
       return {'err': 'an error posting batch data points'}, 500, {'Content-Type': 'application/json'}
+    
+  @app.route('/client/', methods=['GET'])
+  def client():
+    if request.method == 'GET':
+      return render_template('client.html', points=[{k: v for k, v in d.items() if k != '_id'} for d in list(cluster.find())])  # Ensure 'client.html' is in the 'templates' folder
+
+
+  @app.route('/recent/', methods=['GET'])
+  def recent():
+    if request.method == 'GET':
+      return render_template('client.html', points=[{k: v for k, v in d.items() if k != '_id'} for d in fetch_x_most_recent(cluster)])  # Ensure 'client.html' is in the 'templates' folder
+
 
   return app
-
-

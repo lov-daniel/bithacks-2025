@@ -19,4 +19,5 @@ def get_collection(uri, database, collection):
   print('getting collection')
   return get_database(uri, database)[collection]
 
-
+def empty_db(collection):
+  collection.delete_many({})
