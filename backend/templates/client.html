@@ -5,50 +5,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Points Graph</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart2music@1.18.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-chart2music@0.6.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart2music"></script>
 </head>
 <body>
     <h1>Acceleration Data Graph</h1>
-    <canvas id="accelChart" width="800" height="400"></canvas>
+    <!-- <canvas id="accelChart" tabindex='0' width="800" height="400" role="img" aria-label="Line graph showing acceleration over time."></canvas>
+    <div id="screenReaderText"></div> -->
+    
+    <canvas id="accelXChart" tabindex="0" width="800" height="400" role="img" aria-label="Line graph showing acceleration X over time."></canvas>
+    <div id="screenReaderTextX"></div>
 
+    <canvas id="accelYChart" tabindex="0" width="800" height="400" role="img" aria-label="Line graph showing acceleration Y over time."></canvas>   
+    <div id="screenReaderTextY"></div>
+
+    <canvas id="accelZChart" tabindex="0" width="800" height="400" role="img" aria-label="Line graph showing acceleration Z over time."></canvas>
+    <div id="screenReaderTextZ"></div>
+    
+    
+    
+    
     <script>
         // Jinja2 templated variable
         const points = {{ points | tojson }};
 
         // Extract data for the graph
-        const timestamps = points.map(point => point.timestamp);
+        const timestamps = points.map(point =>  new Date(point.timestamp));
         const accelX = points.map(point => point.accel_x);
         const accelY = points.map(point => point.accel_y);
         const accelZ = points.map(point => point.accel_z);
+        
+        const a_x = accelX.map((value, index) => ({
+            x: (new Date(timestamps[index])).valueOf(),
+            y: value
+        }));
 
-        // Create the chart
-        const ctx = document.getElementById('accelChart').getContext('2d');
-        new Chart(ctx, {
+        const a_y = accelY.map((value, index) => ({
+            x: (new Date(timestamps[index])).valueOf(),
+            y: value
+        }));
+
+        const a_z = accelZ.map((value, index) => ({
+            x: (new Date(timestamps[index])).valueOf(),
+            y: value
+        }));
+
+        // console.log(a_x)
+
+        c2mChart({
+            title: 'Acceleration X Data Graph',
+            type: 'line',
+            element: document.getElementById('accelXChart'),
+            cc: document.getElementById('screenReaderTextX'),
+            data: a_x,
+            axes: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Timestamp'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Acceleration X'
+                    }
+                }
+            },
+        });
+
+        c2mChart({
+            title: 'Acceleration Y Data Graph',
+            type: 'line',
+            element: document.getElementById('accelYChart'),
+            cc: document.getElementById('screenReaderTextY'),
+            data: a_y,
+            axes: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Timestamp'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Acceleration Y'
+                    }
+                }
+            },
+        });
+
+        c2mChart({
+            title: 'Acceleration Z Data Graph',
+            type: 'line',
+            element: document.getElementById('accelZChart'),
+            cc: document.getElementById('screenReaderTextZ'),
+            data: a_z,
+            axes: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Timestamp'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Acceleration Z'
+                    }
+                }
+            },
+        });
+
+        const chartx = document.getElementById('accelXChart').getContext('2d');
+        new Chart(chartx, {
             type: 'line',
             data: {
-                labels: timestamps,
+                labels: timestamps.map(timestamp => (new Date(timestamp)).valueOf()),
                 datasets: [
                     {
                         label: 'Accel X',
                         data: accelX,
                         borderColor: 'red',
                         fill: false
-                    },
-                    {
-                        label: 'Accel Y',
-                        data: accelY,
-                        borderColor: 'green',
-                        fill: false
-                    },
-                    {
-                        label: 'Accel Z',
-                        data: accelZ,
-                        borderColor: 'blue',
-                        fill: false
                     }
                 ]
             },
             options: {
                 responsive: true,
+                plugins: {
+                    chart2music: {
+                        summary: 'This line chart shows acceleration X over time using a red line.'
+                    }
+                },
+                // plugins: [chart2music],
                 scales: {
                     x: {
                         title: {
@@ -59,12 +151,166 @@
                     y: {
                         title: {
                             display: true,
-                            text: 'Acceleration'
+                            text: 'Acceleration X'
                         }
                     }
                 }
             }
         });
+        const charty = document.getElementById('accelYChart').getContext('2d');
+        new Chart(charty, {
+            type: 'line',
+            data: {
+                labels: timestamps.map(timestamp => (new Date(timestamp)).valueOf()),
+                datasets: [
+                    {
+                        label: 'Accel Y',
+                        data: accelY,
+                        borderColor: 'green',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    chart2music: {
+                        summary: 'This line chart shows acceleration Y over time using a green line.'
+                    }
+                },
+                // plugins: [chart2music],
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Timestamp'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Acceleration Y'
+                        }
+                    }
+                }
+            }
+        });
+        const chartz = document.getElementById('accelZChart').getContext('2d');
+        new Chart(chartz, {
+            type: 'line',
+            data: {
+                labels: timestamps.map(timestamp => (new Date(timestamp)).valueOf()),
+                datasets: [
+                    {
+                        label: 'Accel Z',
+                        data: accelZ,
+                        borderColor: 'blue',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    chart2music: {
+                        summary: 'This line chart shows acceleration Z over time using a blue line.'
+                    }
+                },
+                // plugins: [chart2music],
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Timestamp'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Acceleration Z'
+                        }
+                    }
+                }
+            }
+        });
+
+        // c2mChart({
+        //     title: 'Acceleration Data Graph',
+        //     type: 'line',
+        //     element: document.getElementById('accelChart'),
+        //     cc: document.getElementById('screenReaderText'),
+        //     // data: {
+        //     //     'Accel X': accelX.map((value, index) => ({ x: timestamps[index], y: value })),
+        //     //     'Accel Y': accelY.map((value, index) => ({ x: timestamps[index], y: value })),
+        //     //     'Accel Z': accelZ.map((value, index) => ({ x: timestamps[index], y: value }))
+        //     // },
+        //     data: a_x,
+        //     axes: {
+        //         x: {
+        //             title: {
+        //                 display: true,
+        //                 text: 'Timestamp'
+        //             }
+        //         },
+        //         y: {
+        //             title: {
+        //                 display: true,
+        //                 text: 'Acceleration'
+        //             }
+        //         }
+        //     },
+        // });
+
+        // // Create the chart
+        // const ctx = document.getElementById('accelChart').getContext('2d');
+        // new Chart(ctx, {
+        //     type: 'line',
+        //     data: {
+        //         labels: timestamps.map(timestamp => (new Date(timestamp)).valueOf()),
+        //         datasets: [
+        //             {
+        //                 label: 'Accel X',
+        //                 data: accelX,
+        //                 borderColor: 'red',
+        //                 fill: false
+        //             },
+        //             {
+        //                 label: 'Accel Y',
+        //                 data: accelY,
+        //                 borderColor: 'green',
+        //                 fill: false
+        //             },
+        //             {
+        //                 label: 'Accel Z',
+        //                 data: accelZ,
+        //                 borderColor: 'blue',
+        //                 fill: false
+        //             }
+        //         ]
+        //     },
+        //     options: {
+        //         responsive: true,
+        //         plugins: {
+        //             chart2music: {
+        //                 summary: 'This line chart shows three axes of acceleration over time using red, green, and blue lines.'
+        //             }
+        //         },
+        //         scales: {
+        //             x: {
+        //                 title: {
+        //                     display: true,
+        //                     text: 'Timestamp'
+        //                 }
+        //             },
+        //             y: {
+        //                 title: {
+        //                     display: true,
+        //                     text: 'Acceleration'
+        //                 }
+        //             }
+        //         }
+        //     }
+        // });
     </script>
 </body>
 </html>

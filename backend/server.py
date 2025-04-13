@@ -30,7 +30,7 @@ def make_prediction(cluster):
     z.append(data['accel_z'])
     
   parent_dir =  os.path.dirname(os.getcwd())
-  cnn_model = tensorflow.keras.models.load_model(parent_dir + "\ML\model_cnn.keras")
+  cnn_model = tensorflow.keras.models.load_model(parent_dir + "/ML/model_cnn.keras")
 
   accel_data = np.column_stack((x, y, z))
 
@@ -57,9 +57,9 @@ def create_app():
   if ('remove' in vars and vars['remove'] == 'true'):
     empty_db(cluster)
 
-  print(list(cluster.find()))
-  for v in cluster.find():
-    print(v)
+  # print(list(cluster.find()))
+  # for v in cluster.find():
+  #   print(v)
 
   app = Flask(__name__)
 
