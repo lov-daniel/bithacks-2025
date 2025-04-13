@@ -1,0 +1,5 @@
+keras
+liac-arff
+numpy
+tensorflow
+scikit-learn
