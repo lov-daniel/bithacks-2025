@@ -7,14 +7,42 @@ from dateutil import parser
 from bson import json_util, ObjectId
 import json
 
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+import numpy as np
+import tensorflow
+from tensorflow.keras import layers, models
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from sklearn.preprocessing import StandardScaler
+
 def fetch_x_most_recent(cluster, limit=206):
   return list(cluster.aggregate([
       {"$sort": {"timestamp": -1}},
       {"$limit": limit}
   ]))[::-1]
 
-def make_prediction():
-  pass
+def make_prediction(cluster):
+  x, y, z = [], [], []
+  recent_data = fetch_x_most_recent(cluster)
+  for data in recent_data:
+    x.append(data['accel_x'])
+    y.append(data['accel_y'])
+    z.append(data['accel_z'])
+    
+  parent_dir =  os.path.dirname(os.getcwd())
+  cnn_model = tensorflow.keras.models.load_model(parent_dir + "\ML\model_cnn.keras")
+
+  accel_data = np.column_stack((x, y, z))
+
+  scaler = StandardScaler()
+  accel_data_reshaped = accel_data.reshape(-1, 3)
+  accel_data_scaled = scaler.fit_transform(accel_data_reshaped)
+  accel_data_scaled = accel_data_scaled.reshape(1, 206, 3)
+
+  cnn_pred = cnn_model.predict(accel_data_scaled)
+ 
+  return ("1" if cnn_pred[0][0] > 0.5 else "0")
+  
 
 def create_app():
   vars = {}
@@ -54,9 +82,10 @@ def create_app():
     try:
       data['timestamp'] = parser.parse(data['timestamp'])
       cluster.insert_one(data)
-      return json.loads(json_util.dumps(list(cluster.find()))), 201, {'Content-Type': 'application/json'}
+      return make_prediction(cluster), 201, {'Content-Type': 'application/json'}
     except:
-      return {'err': 'an error posting single data point'}, 500, {'Content-Type': 'application/json'}
+      pass
+      # return {'err': 'an error posting single data point'}, 500, {'Content-Type': 'application/json'}
 
 
   @app.route('/insert-batch/', methods=['GET', 'POST'])
@@ -75,9 +104,10 @@ def create_app():
       for points in data['data']:
         points['timestamp'] = parser.parse(points['timestamp'])
       cluster.insert_many(data['data'])
-      return json.loads(json_util.dumps(list(cluster.find()))), 201, {'Content-Type': 'application/json'}
+      return make_prediction(cluster), 201, {'Content-Type': 'application/json'}
     except:
-      return {'err': 'an error posting batch data points'}, 500, {'Content-Type': 'application/json'}
+      pass
+      # return {'err': 'an error posting batch data points'}, 500, {'Content-Type': 'application/json'}
     
   @app.route('/client/', methods=['GET'])
   def client():
